@@ -42,7 +42,7 @@ DB_PASS=pass_12345qwerty
 ```
 Postgres:
   Domain: postgresql://admin:pass@db.website.com:5432/db
-  IP address: postgresql://admin:pass@46.101.120.53:5432/db
+  IP: postgresql://admin:pass@46.101.120.53:5432/db
 
 Redis:
   Domain: redis://db.website.com:6379
