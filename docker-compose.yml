@@ -2,32 +2,20 @@ version: "3.7"
 
 services:
   proxy:
-    image: traefik:v2.5
+    image: traefik:latest
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       # Endpoints setup
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
       - "--entrypoints.postgres.address=:5432" # PostgreSQL endpoint
       - "--entrypoints.redis.address=:6379" # Redis endpoint
-      # ACME setup
-      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge=true"
-      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=digitalocean"
-      - "--certificatesresolvers.mydnschallenge.acme.email=email@website.com"
-      - "--certificatesresolvers.mydnschallenge.acme.storage=/acme.json"
-    environment:
-      - DO_AUTH_TOKEN=${DO_AUTH_TOKEN}
     ports:
-      - "80:80"
-      - "443:443"
-      - "6969:8080"
+      - "6969:8080" # Traefik dashboard
       - "5432:5432" # PostgreSQL port
       - "6379:6379" # Redis port
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./acme/acme.json:/acme.json
 
   postgres:
     image: postgres
@@ -46,10 +34,6 @@ services:
       - "traefik.tcp.routers.postgres.service=postgres"
       # services (needed for TCP)
       - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
-      # tls
-      - "traefik.http.routers.postgres.tls.certresolver=mydnschallenge"
-      - "traefik.http.routers.postgres.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.postgres.tls.domains[0].sans=db.${DOMAIN_NAME}"
 
   redis:
     image: bitnami/redis:latest
@@ -63,12 +47,8 @@ services:
     labels:
       - "traefik.enable=true"
       # routers
-      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)" # was *
+      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.redis.entryPoints=redis"
       - "traefik.tcp.routers.redis.service=redis"
       # services (needed for TCP)
       - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
-      # tls
-      - "traefik.http.routers.redis.tls.certresolver=mydnschallenge"
-      - "traefik.http.routers.redis.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.redis.tls.domains[0].sans=db.${DOMAIN_NAME}"
