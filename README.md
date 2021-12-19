@@ -4,9 +4,7 @@ This starter is useful for development purposes and faster environment setup.
 
 It deploys PostgreSQL and Redis containers on a server and the containers are exposed to public. So you can share it among the teammates.
 
-You can connect to a database using `postgresql://admin:pass@db.website.com:5432/db` or directly with server's IP address `postgresql://admin:pass@46.101.120.53:5432/db`
-
-For the full information, check out [the article]().
+For the full explanation, check out [the article]().
 
 ### Quick tutorial
 
@@ -14,7 +12,8 @@ For the full information, check out [the article]().
 2. Clone the repo:
 
 ```
-> git clone https://github.com/kanzitelli/postgres-and-redis-behind-traefik.git backend && cd backend
+> git clone https://github.com/kanzitelli/postgres-and-redis-behind-traefik.git backend
+> cd backend
 ```
 
 3. Set up `.env` file:
@@ -43,9 +42,9 @@ DB_PASS=pass_12345qwerty
 ```
 Postgres:
   Domain: postgresql://admin:pass@db.website.com:5432/db
-  IP address: postgresql://admin:pass@46.101.120.53:5432:5432/db
+  IP address: postgresql://admin:pass@46.101.120.53:5432/db
 
 Redis:
   Domain: redis://db.website.com:6379
-  IP: redis://46.101.120.53:5432:6379
+  IP: redis://46.101.120.53:6379
 ```
