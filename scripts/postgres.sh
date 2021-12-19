@@ -1,5 +1,5 @@
-DIR=../appdata/postgres
+DIR=appdata/postgres
 
 if [ ! -d "$DIR" ]; then
-  mkdir ../appdata/postgres
+  mkdir appdata/postgres
 fi
