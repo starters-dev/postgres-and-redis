@@ -15,7 +15,7 @@ services:
       # ACME setup
       - "--certificatesresolvers.mydnschallenge.acme.dnschallenge=true"
       - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=digitalocean"
-      - "--certificatesresolvers.mydnschallenge.acme.email=your-email@website.com"
+      - "--certificatesresolvers.mydnschallenge.acme.email=email@website.com"
       - "--certificatesresolvers.mydnschallenge.acme.storage=/acme.json"
     environment:
       - DO_AUTH_TOKEN=${DO_AUTH_TOKEN}
@@ -40,15 +40,16 @@ services:
       - ./appdata/postgres:/var/lib/postgresql/data
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      # routers
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`postgres.${DOMAIN_NAME}`)" # was *
       - "traefik.tcp.routers.postgres.entryPoints=postgres"
       - "traefik.tcp.routers.postgres.service=postgres"
       # services (needed for TCP)
       - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
-      # doing https
+      # tls
       - "traefik.http.routers.postgres.tls.certresolver=mydnschallenge"
       - "traefik.http.routers.postgres.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.postgres.tls.domains[0].sans=server.${DOMAIN_NAME}"
+      - "traefik.http.routers.postgres.tls.domains[0].sans=postgres.${DOMAIN_NAME}"
 
   redis:
     image: bitnami/redis:latest
@@ -61,12 +62,13 @@ services:
       - ./appdata/redis:/bitnami/redis/data
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)"
+      # routers
+      - "traefik.tcp.routers.redis.rule=HostSNI(`redis.${DOMAIN_NAME}`)" # was *
       - "traefik.tcp.routers.redis.entryPoints=redis"
       - "traefik.tcp.routers.redis.service=redis"
       # services (needed for TCP)
       - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
-      # doing https
+      # tls
       - "traefik.http.routers.redis.tls.certresolver=mydnschallenge"
       - "traefik.http.routers.redis.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.redis.tls.domains[0].sans=server.${DOMAIN_NAME}"
+      - "traefik.http.routers.redis.tls.domains[0].sans=redis.${DOMAIN_NAME}"
