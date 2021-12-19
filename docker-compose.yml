@@ -1,0 +1,72 @@
+version: "3.7"
+
+services:
+  proxy:
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Endpoints setup
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.postgres.address=:5432" # PostgreSQL endpoint
+      - "--entrypoints.redis.address=:6379" # Redis endpoint
+      # ACME setup
+      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge=true"
+      - "--certificatesresolvers.mydnschallenge.acme.dnschallenge.provider=digitalocean"
+      - "--certificatesresolvers.mydnschallenge.acme.email=your-email@website.com"
+      - "--certificatesresolvers.mydnschallenge.acme.storage=/acme.json"
+    environment:
+      - DO_AUTH_TOKEN=${DO_AUTH_TOKEN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "6969:8080"
+      - "5432:5432" # PostgreSQL port
+      - "6379:6379" # Redis port
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme/acme.json:/acme.json
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - ./appdata/postgres:/var/lib/postgresql/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.postgres.entryPoints=postgres"
+      - "traefik.tcp.routers.postgres.service=postgres"
+      # services (needed for TCP)
+      - "traefik.tcp.services.postgres.loadbalancer.server.port=5432"
+      # doing https
+      - "traefik.http.routers.postgres.tls.certresolver=mydnschallenge"
+      - "traefik.http.routers.postgres.tls.domains[0].main=${DOMAIN_NAME}"
+      - "traefik.http.routers.postgres.tls.domains[0].sans=server.${DOMAIN_NAME}"
+
+  redis:
+    image: bitnami/redis:latest
+    restart: always
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    volumes:
+      - ./appdata/redis:/bitnami/redis/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.redis.entryPoints=redis"
+      - "traefik.tcp.routers.redis.service=redis"
+      # services (needed for TCP)
+      - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
+      # doing https
+      - "traefik.http.routers.redis.tls.certresolver=mydnschallenge"
+      - "traefik.http.routers.redis.tls.domains[0].main=${DOMAIN_NAME}"
+      - "traefik.http.routers.redis.tls.domains[0].sans=server.${DOMAIN_NAME}"
