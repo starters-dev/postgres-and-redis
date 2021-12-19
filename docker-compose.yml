@@ -41,7 +41,7 @@ services:
     labels:
       - "traefik.enable=true"
       # routers
-      - "traefik.tcp.routers.postgres.rule=HostSNI(`postgres.${DOMAIN_NAME}`)" # was *
+      - "traefik.tcp.routers.postgres.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.postgres.entryPoints=postgres"
       - "traefik.tcp.routers.postgres.service=postgres"
       # services (needed for TCP)
@@ -49,7 +49,7 @@ services:
       # tls
       - "traefik.http.routers.postgres.tls.certresolver=mydnschallenge"
       - "traefik.http.routers.postgres.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.postgres.tls.domains[0].sans=postgres.${DOMAIN_NAME}"
+      - "traefik.http.routers.postgres.tls.domains[0].sans=db.${DOMAIN_NAME}"
 
   redis:
     image: bitnami/redis:latest
@@ -63,7 +63,7 @@ services:
     labels:
       - "traefik.enable=true"
       # routers
-      - "traefik.tcp.routers.redis.rule=HostSNI(`redis.${DOMAIN_NAME}`)" # was *
+      - "traefik.tcp.routers.redis.rule=HostSNI(`*`)" # was *
       - "traefik.tcp.routers.redis.entryPoints=redis"
       - "traefik.tcp.routers.redis.service=redis"
       # services (needed for TCP)
@@ -71,4 +71,4 @@ services:
       # tls
       - "traefik.http.routers.redis.tls.certresolver=mydnschallenge"
       - "traefik.http.routers.redis.tls.domains[0].main=${DOMAIN_NAME}"
-      - "traefik.http.routers.redis.tls.domains[0].sans=redis.${DOMAIN_NAME}"
+      - "traefik.http.routers.redis.tls.domains[0].sans=db.${DOMAIN_NAME}"
