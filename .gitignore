@@ -1,3 +1,4 @@
 .env*
 acme/
 appdata/
+_media/
