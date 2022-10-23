@@ -1,5 +1,11 @@
 # Deploying PostgreSQL and Redis behind Traefik in the Cloud
 
+---
+
+⚠️ This repo is not maintained anymore. Please, use [https-backend](https://github.com/starters-dev/https-backend) instead.
+
+---
+
 This starter is useful for development purposes and faster environment setup.
 
 It deploys PostgreSQL and Redis containers on a server and the containers are exposed to public. So you can share it among the teammates.
